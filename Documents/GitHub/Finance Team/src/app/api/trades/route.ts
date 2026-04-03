@@ -18,7 +18,10 @@ const DEV_USER_ID = "dev-user-001";
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "You must be signed in to view the feed. Please sign in with GitHub." },
+      { status: 401 }
+    );
   }
 
   try {
@@ -53,7 +56,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "You must be signed in to log a trade. Please sign in with GitHub." },
+      { status: 401 }
+    );
   }
   const userId = session?.user?.id ?? DEV_USER_ID;
 
