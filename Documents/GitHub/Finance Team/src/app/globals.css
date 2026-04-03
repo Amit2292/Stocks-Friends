@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 13% 8%;
+    --foreground: 220 14% 90%;
+    --card: 222 13% 12%;
+    --card-foreground: 220 14% 90%;
+    --popover: 222 13% 10%;
+    --popover-foreground: 220 14% 90%;
+    --primary: 226 100% 85%;
+    --primary-foreground: 226 100% 20%;
+    --secondary: 158 70% 60%;
+    --secondary-foreground: 158 70% 10%;
+    --muted: 222 13% 18%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 222 13% 18%;
+    --accent-foreground: 220 14% 90%;
+    --destructive: 350 80% 58%;
+    --destructive-foreground: 220 14% 90%;
+    --border: 222 13% 22%;
+    --input: 222 13% 15%;
+    --ring: 226 80% 70%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #0e0e10;
+    color: #e5e1e4;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #353437;
+    border-radius: 10px;
+  }
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker-scroll 15s linear infinite;
+  will-change: transform;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
