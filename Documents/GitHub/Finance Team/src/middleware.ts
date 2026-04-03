@@ -1,11 +1,12 @@
-// Auth middleware temporarily disabled for local development/UI work.
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-export function middleware(_req: NextRequest) {
-  return NextResponse.next();
-}
+export { auth as middleware } from "@/lib/auth";
 
 export const config = {
-  matcher: ["/feed/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/feed/:path*",
+    "/dashboard/:path*",
+    "/search/:path*",
+    "/news/:path*",
+    "/groups/:path*",
+    "/settings/:path*",
+  ],
 };

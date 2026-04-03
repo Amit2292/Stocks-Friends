@@ -45,6 +45,13 @@ export default async function HomePage() {
               </svg>
               Sign in with GitHub
             </a>
+            <a href="/api/auth/signin/google"
+              className="flex items-center gap-3 px-8 py-3.5 bg-white hover:bg-zinc-100 text-zinc-900 font-bold rounded-lg text-sm transition-all active:scale-[0.98] shadow-lg">
+              <span className="w-5 h-5 flex items-center justify-center font-extrabold text-base leading-none">
+                <span style={{ color: "#4285F4" }}>G</span>
+              </span>
+              Sign in with Google
+            </a>
             <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-[0.25em]">
               Invite only · Admin approval required
             </p>
