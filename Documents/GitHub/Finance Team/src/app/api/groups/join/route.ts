@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
+import { ensureUser } from "@/lib/ensure-user";
 
 const DEV_USER_ID = "dev-user-001";
 
@@ -11,6 +12,7 @@ export async function POST(request: NextRequest) {
   if (!user && process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
+  if (user) await ensureUser(user);
   const userId = user?.id ?? DEV_USER_ID;
 
   let body: { code?: string };

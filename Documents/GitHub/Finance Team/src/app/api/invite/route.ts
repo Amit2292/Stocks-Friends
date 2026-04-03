@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
+import { ensureUser } from "@/lib/ensure-user";
 import { nanoid } from "nanoid";
 
 const DEV_USER_ID = "dev-user-001";
@@ -12,6 +13,7 @@ export async function GET() {
   if (!user && process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
+  if (user) await ensureUser(user);
   const userId = user?.id ?? DEV_USER_ID;
 
   const { rows } = await sql`
@@ -34,6 +36,7 @@ export async function POST() {
   if (!user && process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
+  if (user) await ensureUser(user);
   const userId = user?.id ?? DEV_USER_ID;
 
   const code = nanoid(12);

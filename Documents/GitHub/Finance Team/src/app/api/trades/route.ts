@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
+import { ensureUser } from "@/lib/ensure-user";
 import { z } from "zod";
 
 const createTradeSchema = z.object({
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     );
   }
+  if (user) await ensureUser(user);
   const userId = user?.id ?? DEV_USER_ID;
 
   let body: unknown;

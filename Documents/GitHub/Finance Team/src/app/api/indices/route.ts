@@ -2,19 +2,16 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const INDICES = [
-  { symbol: "^TA35",   label: "TA-35",      flag: "🇮🇱" },
-  { symbol: "^TA125",  label: "TA-125",     flag: "🇮🇱" },
-  { symbol: "^DJI",    label: "DOW",        flag: "🇺🇸" },
-  { symbol: "^GSPC",   label: "S&P 500",   flag: "🇺🇸" },
-  { symbol: "^IXIC",   label: "NASDAQ",     flag: "🇺🇸" },
-  { symbol: "^RUT",    label: "RUSSELL",    flag: "🇺🇸" },
-  { symbol: "^VIX",    label: "VIX",        flag: "🇺🇸" },
-  { symbol: "^GDAXI",  label: "DAX",        flag: "🇩🇪" },
-  { symbol: "^FTSE",   label: "FTSE 100",   flag: "🇬🇧" },
-  { symbol: "^FCHI",   label: "CAC 40",     flag: "🇫🇷" },
-  { symbol: "^BVSP",   label: "BOVESPA",    flag: "🇧🇷" },
-  { symbol: "^GSPTSE", label: "S&P/TSX",    flag: "🇨🇦" },
+// Major ETFs that proxy world indices — all priced by Massive API free tier
+const ETF_MAP = [
+  { ticker: "SPY",  label: "S&P 500",  flag: "🇺🇸" },
+  { ticker: "QQQ",  label: "NASDAQ",   flag: "🇺🇸" },
+  { ticker: "DIA",  label: "DOW",      flag: "🇺🇸" },
+  { ticker: "IWM",  label: "RUSSELL",  flag: "🇺🇸" },
+  { ticker: "EWG",  label: "DAX",      flag: "🇩🇪" },
+  { ticker: "EWU",  label: "FTSE",     flag: "🇬🇧" },
+  { ticker: "GLD",  label: "GOLD",     flag: "🟡"  },
+  { ticker: "TLT",  label: "BONDS",    flag: "📈"  },
 ];
 
 export interface IndexQuote {
@@ -26,38 +23,49 @@ export interface IndexQuote {
   changePercent: number;
 }
 
-const HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  "Accept": "application/json",
-  "Accept-Language": "en-US,en;q=0.9",
-};
+const MASSIVE_BASE = "https://api.massive.com";
 
-async function fetchOne(idx: typeof INDICES[0]): Promise<IndexQuote | null> {
+async function fetchETF(
+  item: typeof ETF_MAP[0],
+  apiKey: string
+): Promise<IndexQuote | null> {
   try {
-    const encoded = encodeURIComponent(idx.symbol);
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?interval=1d&range=1d`;
-    const res = await fetch(url, { headers: HEADERS, next: { revalidate: 60 } });
+    const res = await fetch(
+      `${MASSIVE_BASE}/v2/aggs/ticker/${item.ticker}/prev?adjusted=true&apiKey=${apiKey}`,
+      { next: { revalidate: 120 } }
+    );
     if (!res.ok) return null;
     const data = await res.json();
-    const meta = data?.chart?.result?.[0]?.meta;
-    if (!meta) return null;
-    const price = meta.regularMarketPrice ?? meta.chartPreviousClose ?? 0;
-    const prevClose = meta.chartPreviousClose ?? meta.previousClose ?? price;
-    const change = price - prevClose;
-    const changePercent = prevClose ? (change / prevClose) * 100 : 0;
-    return { symbol: idx.symbol, label: idx.label, flag: idx.flag, price, change, changePercent };
+    const bar = data?.results?.[0];
+    if (!bar) return null;
+    const price = bar.c;
+    const change = price - bar.o;
+    const changePercent = bar.o ? (change / bar.o) * 100 : 0;
+    return {
+      symbol: item.ticker,
+      label: item.label,
+      flag: item.flag,
+      price,
+      change,
+      changePercent,
+    };
   } catch {
     return null;
   }
 }
 
 export async function GET() {
+  const apiKey = process.env.MASSIVE_API_KEY ?? process.env.POLYGON_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ indices: [] });
+  }
+
   try {
-    const results = await Promise.all(INDICES.map(fetchOne));
+    const results = await Promise.all(ETF_MAP.map((item) => fetchETF(item, apiKey)));
     const indices = results.filter((r): r is IndexQuote => r !== null);
     return NextResponse.json(
       { indices },
-      { headers: { "Cache-Control": "public, s-maxage=60" } }
+      { headers: { "Cache-Control": "public, s-maxage=120" } }
     );
   } catch (error) {
     console.error("[GET /api/indices]", error);
