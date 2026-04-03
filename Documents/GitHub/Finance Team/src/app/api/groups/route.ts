@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
 import { z } from "zod";
 
@@ -7,11 +7,12 @@ const DEV_USER_ID = "dev-user-001";
 
 // GET /api/groups — list groups the user belongs to
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
-  const userId = session?.user?.id ?? DEV_USER_ID;
+  const userId = user?.id ?? DEV_USER_ID;
 
   const { rows } = await sql`
     SELECT
@@ -32,11 +33,12 @@ const createGroupSchema = z.object({
 
 // POST /api/groups — create a new group
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
-  const userId = session?.user?.id ?? DEV_USER_ID;
+  const userId = user?.id ?? DEV_USER_ID;
 
   let body: unknown;
   try { body = await request.json(); } catch {

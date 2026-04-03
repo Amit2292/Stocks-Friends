@@ -1,12 +1,13 @@
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import NewsClient from "./NewsClient";
 
 export const metadata = { title: "News — Alpha Friends" };
 
 export default async function NewsPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/");
 
   return <NewsClient />;
 }

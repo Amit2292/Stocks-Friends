@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
 import Sidebar from "@/components/Sidebar";
 import TickerBar from "@/components/TickerBar";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,7 +26,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-[#0e0e10] text-[#e5e1e4]`}>
-        <SessionProvider>
           {/* Ticker bar — full width, above everything */}
           <TickerBar />
           <div className="flex" style={{ minHeight: "calc(100vh - 2rem)" }}>
@@ -37,7 +35,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </main>
           </div>
           <Toaster />
-        </SessionProvider>
       </body>
     </html>
   );

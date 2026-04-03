@@ -1,12 +1,13 @@
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import StockSearch from "@/components/StockSearch";
 
 export const metadata = { title: "Search — Alpha Friends" };
 
 export default async function SearchPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/");
 
   return (
     <div className="py-4">

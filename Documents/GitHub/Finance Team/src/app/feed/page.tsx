@@ -1,9 +1,10 @@
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import FeedClient from "./FeedClient";
 
 export default async function FeedPage() {
-  const session = await auth();
-  const userId = session?.user?.id ?? "dev-user-001";
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id ?? "dev-user-001";
 
   return (
     <div className="space-y-8">

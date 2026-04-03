@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
 import { nanoid } from "nanoid";
 
@@ -7,11 +7,12 @@ const DEV_USER_ID = "dev-user-001";
 
 // GET /api/invite — list my invite codes
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
-  const userId = session?.user?.id ?? DEV_USER_ID;
+  const userId = user?.id ?? DEV_USER_ID;
 
   const { rows } = await sql`
     SELECT
@@ -28,11 +29,12 @@ export async function GET() {
 
 // POST /api/invite — generate a new invite code
 export async function POST() {
-  const session = await auth();
-  if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
-  const userId = session?.user?.id ?? DEV_USER_ID;
+  const userId = user?.id ?? DEV_USER_ID;
 
   const code = nanoid(12);
   const { rows } = await sql`

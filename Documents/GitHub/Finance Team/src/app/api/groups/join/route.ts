@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { sql } from "@/lib/db";
 
 const DEV_USER_ID = "dev-user-001";
 
 // POST /api/groups/join  { code: "abc123" }
 export async function POST(request: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id && process.env.NODE_ENV !== "development") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user && process.env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
   }
-  const userId = session?.user?.id ?? DEV_USER_ID;
+  const userId = user?.id ?? DEV_USER_ID;
 
   let body: { code?: string };
   try { body = await request.json(); } catch {
