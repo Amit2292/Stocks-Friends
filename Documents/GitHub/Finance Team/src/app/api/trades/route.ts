@@ -102,6 +102,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ trade: rows[0] }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/trades]", error);
+    const msg = error instanceof Error ? error.message : "";
+    if (msg.includes("foreign key")) {
+      return NextResponse.json(
+        { error: "Session expired — please sign in again." },
+        { status: 403 }
+      );
+    }
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

@@ -110,6 +110,9 @@ export default function FeedClient({ currentUserId }: FeedClientProps) {
       <TradeModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
+        initialTicker={quickTicker}
+        initialPrice={quickPrice ? parseFloat(quickPrice) : undefined}
+        initialType={quickType}
         onSuccess={() => {
           setIsModalOpen(false);
           setQuickTicker("");
