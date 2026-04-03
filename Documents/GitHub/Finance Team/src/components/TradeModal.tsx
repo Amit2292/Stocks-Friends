@@ -44,12 +44,18 @@ interface TradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  initialTicker?: string;
+  initialPrice?: number;
+  initialType?: "BUY" | "SELL";
 }
 
 export default function TradeModal({
   open,
   onOpenChange,
   onSuccess,
+  initialTicker,
+  initialPrice,
+  initialType,
 }: TradeModalProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,9 +64,9 @@ export default function TradeModal({
   const form = useForm<TradeFormValues>({
     resolver: zodResolver(tradeFormSchema),
     defaultValues: {
-      ticker: "",
-      type: "BUY",
-      price: undefined,
+      ticker: initialTicker ?? "",
+      type: initialType ?? "BUY",
+      price: initialPrice ?? undefined,
       quantity: undefined,
       notes: "",
     },
